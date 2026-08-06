@@ -1,1 +1,1 @@
-
+# Данные SEEDS Сами .mat файлы не хранятся в репозитории (см. .gitignore). Источник: Matran-Fernandez et al., "SEEDS: a large-scale multimodal dataset for human-computer interaction", Scientific Data (2019). https://www.nature.com/articles/s41597-019-0200-9
