@@ -1,0 +1,16 @@
+# Данные (тяжёлые бинарники, не коммитим)
+data/*.mat
+data/**/*.mat
+*.dat
+*.hea
+
+# MATLAB
+*.asv
+*.m~
+slprj/
+*.autosave
+
+# ОС
+.DS_Store
+Thumbs.db
+desktop.ini
