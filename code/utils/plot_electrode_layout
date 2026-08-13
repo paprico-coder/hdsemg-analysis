@@ -1,0 +1,28 @@
+function fig = plot_electrode_layout()
+    fig = figure('Color', 'w');
+    hold on; axis equal; axis off;
+
+    for row = 1:9
+        for col = 1:14
+            ch_name = sprintf('%s%d', char('A' + col - 1), row);
+            x = col;
+            y = 10 - row;   % строка 1 сверху (ближе к локтю)
+
+            rectangle('Position', [x-0.45, y-0.45, 0.9, 0.9], ...
+                'FaceColor', [0.85 0.92 1], 'EdgeColor', [0.3 0.3 0.3]);
+            text(x, y, ch_name, 'HorizontalAlignment', 'center', ...
+                'VerticalAlignment', 'middle', 'FontSize', 7);
+        end
+    end
+
+    text(7.5, 10.3, 'проксимальный конец (ближе к локтю)', ...
+        'HorizontalAlignment', 'center', 'FontSize', 9, 'FontWeight', 'bold');
+    text(7.5, -0.3, 'дистальный конец (ближе к запястью)', ...
+        'HorizontalAlignment', 'center', 'FontSize', 9, 'FontWeight', 'bold');
+    text(0.2, 5, 'A', 'FontSize', 9, 'FontWeight', 'bold');
+    text(14.8, 5, 'N', 'FontSize', 9, 'FontWeight', 'bold');
+
+    title('Схема электродной сетки HD-sEMG (9x14, 126 каналов)');
+    xlim([-0.5, 15.5]);
+    ylim([-1, 11]);
+end
