@@ -1,4 +1,17 @@
 function [grid_rms, fig] = plot_hdsemg_heatmap(emg, channels_emg, title_str)
+%   PLOT_HDSEMG_HEATMAP  Строит heatmap 9x14 RMS-амплитуды HD-sEMG матрицы.
+%
+%   [grid_rms, fig] = PLOT_HDSEMG_HEATMAP(emg, channels_emg, title_str)
+%
+%   Вход:
+%     emg          - 134 x N (или 126 x N) массив EMG-сигналов
+%     channels_emg - имена каналов (134x4 или 126x4 char array), нужны
+%                    только чтобы вычислить (row, col) по имени вида 'MA1'
+%     title_str    - заголовок графика (например, название движения)
+%
+%   Выход:
+%     grid_rms - 9x14 матрица RMS-амплитуды (строка=1..9, столбец=A..N)
+%     fig      - handle фигуры
 
     % Берём только первые 126 каналов (HD-sEMG матрица, без EXG1-8)
     n_hd = 126;
