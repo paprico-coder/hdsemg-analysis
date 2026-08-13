@@ -1,0 +1,55 @@
+function [onset_t, offset_t, envelope, t_env] = detect_movement_onset(emg, fs, baseline_s, k_mad)
+% DETECT_MOVEMENT_ONSET  Находит начало и конец активной фазы движения
+%   по огибающей сигнала HD-sEMG. Устойчив к выбросам: использует медиану
+%   по каналам (не среднее) и порог на основе MAD (не std), плюс
+%   винзоризацию (обрезку) единичных экстремальных значений - один
+%   "испорченный" канал или редкий артефакт не должен ломать детекцию.
+%
+%   [onset_t, offset_t, envelope, t_env] = DETECT_MOVEMENT_ONSET(emg, fs, baseline_s, k_mad)
+%
+%   Вход:
+%     emg        - 134 x N (или 126 x N) массив EMG
+%     fs         - частота дискретизации, Гц
+%     baseline_s - длительность периода покоя в начале записи, с (по умолч. 0.5)
+%     k_mad      - порог в MAD от уровня покоя (по умолч. 5, грубый аналог 3*std)
+%
+%   Выход:
+%     onset_t, offset_t - время начала/конца действия, с (NaN, если не найдено)
+%     envelope, t_env    - огибающая сигнала и её временная ось (для графика)
+
+    if nargin < 3 || isempty(baseline_s)
+        baseline_s = 0.5;
+    end
+    if nargin < 4 || isempty(k_mad)
+        k_mad = 5;
+    end
+
+    emg_hd = emg(1:126, :);
+
+    % --- Обрезаем редкие экстремальные выбросы (артефакты) ---
+    % чтобы один "испорченный" отсчёт/канал не взорвал))) расчёт
+    clip_val = prctile(abs(emg_hd(:)), 99.9);
+    emg_hd = max(min(emg_hd, clip_val), -clip_val);
+
+    % --- Медиана (не среднее!) по каналам - устойчива к тому, что один
+    % канал аномален, даже после винзоризации ---
+    sig = median(emg_hd.^2, 1);
+
+    win_samples = round(0.05 * fs);
+    envelope = sqrt(movmean(sig, win_samples));
+    t_env = (0:numel(envelope)-1) / fs;
+
+    n_base = max(1, round(baseline_s * fs));
+    baseline_med = median(envelope(1:n_base));
+    baseline_mad = mad(envelope(1:n_base), 1);   % 1 = median absolute deviation
+    threshold = baseline_med + k_mad * baseline_mad;
+
+    idx_above = find(envelope > threshold);
+    if isempty(idx_above)
+        onset_t = NaN;
+        offset_t = NaN;
+    else
+        onset_t  = t_env(idx_above(1));
+        offset_t = t_env(idx_above(end));
+    end
+end
