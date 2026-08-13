@@ -1,0 +1,23 @@
+function grid_rms = calc_hdsemg_rms_grid(emg)
+% CALC_HDSEMG_RMS_GRID  Считает RMS-амплитуду по 126 HD-sEMG каналам
+%   и раскладывает в сетку 9x14. Без построения графика (только расчёт) -
+%   используется, когда нужна сама сетка значений (например, чтобы найти
+%   канал с максимальной амплитудой), а не картинка.
+%
+%   grid_rms = CALC_HDSEMG_RMS_GRID(emg)
+%
+%   Вход:  emg      - 134 x N (или 126 x N) массив EMG-сигналов
+%   Выход: grid_rms - 9x14 матрица RMS-амплитуды (строка=1..9, столбец=A..N)
+
+    n_hd = 126;
+    emg_hd = emg(1:n_hd, :);
+
+    rms_vals = sqrt(mean(emg_hd.^2, 2));   % 126 x 1
+
+    grid_rms = nan(9, 14);
+    for k = 1:n_hd
+        col = floor((k-1)/9) + 1;
+        row = mod(k-1, 9) + 1;
+        grid_rms(row, col) = rms_vals(k);
+    end
+end
