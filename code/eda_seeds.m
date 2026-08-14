@@ -615,4 +615,4 @@ saveas(gcf, fullfile(figures_dir, 'fig_1_8_histograms.png'));
 fprintf('\n[1.8] Таблица сохранена: results/table_1_8_movements_comparison.csv\n');
 
 %% --- 1.9. Итоговый вывод ---
-% TODO
+% В документе
