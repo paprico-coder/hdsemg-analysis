@@ -563,7 +563,56 @@ for m = 1:13
 end
 
 %% --- 1.8. Сравнительная таблица по 13 движениям ---
-% TODO
+n_reps_18 = 6;
+comparison_data = struct('code', cell(1,13), 'label', cell(1,13), ...
+    'rms_uV', cell(1,13), 'mean_amp_uV', cell(1,13), 'median_freq_Hz', cell(1,13), 'duration_s', cell(1,13));
+
+for m = 1:13
+    rms_vals      = nan(1, n_reps_18);
+    mean_amp_vals = nan(1, n_reps_18);
+    medfreq_vals  = nan(1, n_reps_18);
+    dur_vals      = nan(1, n_reps_18);
+
+    for r = 1:n_reps_18
+        fname = sprintf('detop_exp01_subj01_Sess1_%s_%02d.mat', movement_codes_all{m}, r);
+        fpath = fullfile(data_dir, 'subj01', fname);
+        if ~isfile(fpath)
+            continue;
+        end
+        dm = load_data(fpath);
+
+        rms_vals(r)      = sqrt(mean(dm.emg(:).^2));
+        mean_amp_vals(r) = mean(abs(dm.emg(:)));
+
+        avg_signal = mean(dm.emg, 1);
+        medfreq_vals(r) = medfreq(avg_signal, dm.fs_emg);
+
+        [onset_t, offset_t] = detect_movement_onset(dm.emg, dm.fs_emg);
+        dur_vals(r) = offset_t - onset_t;
+    end
+
+    comparison_data(m).code           = movement_codes_all{m};
+    comparison_data(m).label          = movement_labels_all{m};
+    comparison_data(m).rms_uV         = mean(rms_vals, 'omitnan');
+    comparison_data(m).mean_amp_uV    = mean(mean_amp_vals, 'omitnan');
+    comparison_data(m).median_freq_Hz = mean(medfreq_vals, 'omitnan');
+    comparison_data(m).duration_s     = mean(dur_vals, 'omitnan');
+end
+
+table_1_8 = struct2table(comparison_data);
+disp(table_1_8);
+writetable(table_1_8, fullfile(results_dir, 'table_1_8_movements_comparison.csv'));
+
+% --- Гистограммы по каждому столбцу ---
+figure('Color','w');
+subplot(2,2,1); histogram(table_1_8.rms_uV, 6);          title('RMS амплитуда'); xlabel('мкВ');
+subplot(2,2,2); histogram(table_1_8.mean_amp_uV, 6);     title('Средняя амплитуда'); xlabel('мкВ');
+subplot(2,2,3); histogram(table_1_8.median_freq_Hz, 6);  title('Медианная частота'); xlabel('Гц');
+subplot(2,2,4); histogram(table_1_8.duration_s, 6);      title('Длительность движения'); xlabel('с');
+sgtitle('Распределение характеристик по 13 движениям');
+saveas(gcf, fullfile(figures_dir, 'fig_1_8_histograms.png'));
+
+fprintf('\n[1.8] Таблица сохранена: results/table_1_8_movements_comparison.csv\n');
 
 %% --- 1.9. Итоговый вывод ---
 % TODO
